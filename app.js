@@ -412,7 +412,7 @@ if(ppno !=undefined){
     sql=sql+` where ppno='${ppno}'`
 }
 
-sql=sql+` status=${status} order by timee`
+sql=sql+` and statuss=${status} order by timee`
 
 if(status==2){
     sql=sql+` desc`
@@ -440,7 +440,11 @@ if (err) {
                 var dname=row['dname']
                 var pname=row['namee']
                 var reason=row['reason']
-                var time= row['timee']
+                var time= new Date(row['timee'])
+
+                time=time.getDate()+"-"+(time.getMonth()+1)+"-"+time.getFullYear()+" "+time.getHours()+":"+time.getMinutes()
+
+
                 
                 
 
