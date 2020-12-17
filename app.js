@@ -250,7 +250,7 @@ app.get("/Hlogin",function(req,res){
     var sql="";
 
 
-    if(type!=""){
+    if(type!=undefined){
         sql=`select * from doctors natural join dType natural join hospitals where dphone='${pNo}' and dtid = ${type}`;
     }
     else{
@@ -299,13 +299,15 @@ app.get("/viewStaff",function(req,res){
     const query=req.query
     var hid=query.hid
     var dtid=query.dtid
-    
 
+
+    
+    
     
 
     var sql="";
 
-    if(dtid==""){
+    if(dtid==undefined){
         sql=`select * from doctors natural join dType where hid=${hid}`   
     }
     else{
@@ -349,6 +351,8 @@ app.get("/viewStaff",function(req,res){
 
 })
 
+// book appoinment
+
 
 app.get("/bAppoint",function(req,res){
     const query=req.query
@@ -389,6 +393,160 @@ const sql=`insert into appointments (ppno, dphone, reason, timee, statuss) value
 
 })
 
+// view appointments
+
+app.get("/viewAppoint",function(req,res){
+
+const query=req.query
+
+var hid=query.hid
+var status= query.status
+var dphone=query.dphone
+var ppno=query.ppno
+
+
+var sql= `select * from appointments NATURAL JOIN patients NATURAL JOIN doctors`;
+
+if(dphone!=undefined){
+    sql=sql+` where dphone='${dphone}'`
+}
+else{
+
+    sql=sql+` where dphone in (select dphone from doctors where hid=${hid})`
+
+}
+
+if(ppno !=undefined){
+    sql=sql+` where ppno='${ppno}'`
+}
+
+sql=sql+` status=${status} order by timee`
+
+if(status==2){
+    sql=sql+` desc`
+}
+
+
+
+con.query(sql, function (err, result) {
+    var items=[]
+if (err) {
+    console.log("connection failed"+err.stack)
+    
+    res.end(JSON.stringify(items))
+        }
+    else{
+        if(result.length==0){
+            
+            res.end(JSON.stringify(items))
+        }
+        
+        else{
+            
+            result.forEach(function(row){
+                var bid=row['bid']
+                var dname=row['dname']
+                var pname=row['namee']
+                var reason=row['reason']
+                var time= parseInt(row['timee'])
+                
+
+                var tp={'bid':bid,'dname':dname,'pname':pname,'reason':reason}
+                 
+                items.push(tp)
+            })
+         
+            res.end(JSON.stringify(items))
+            }
+        }
+          
+    
+}); 
+
+
+
+
+
+
+
+
+})
+
+
+
+//receptionsit acknowledges
+app.get("/ackRecp",function(req,res){
+    const query=req.query
+    var bid=query.bid
+    var date=query.date
+    var time=query.time
+
+    var dateString = date+" "+time,
+    dateTimeParts = dateString.split(' '),
+    timeParts = dateTimeParts[1].split(':'),
+    dateParts = dateTimeParts[0].split('-'),
+    datee;
+
+datee = new Date(dateParts[2], parseInt(dateParts[1], 10) - 1, dateParts[0], timeParts[0], timeParts[1]);
+
+time=datee.getTime()
+
+    const sql=`update appointments set status=1, timee='${time}' where bid=${bid}`;
+    con.query(sql, function (err, result) {
+    if (err) {
+        console.log("connection failed"+err.stack)
+        let temp={'action':'data-wrong-format'}
+        res.end(JSON.stringify(temp))
+            }
+        else{
+            console.log("1 record changed");
+            let temp={'action':'record-changed-successfully'}
+            res.end(JSON.stringify(temp))
+            }
+              
+        
+    }); 
+})
+
+
+//get current crowd
+
+app.get("/getCrowd",function(req,res){
+    const query=req.query
+    
+       
+    var hid=query.hid
+    var status=query.status
+    var dphone=query.dphone
+    
+
+    var sql=`select count(bid) as cnt from appointments where bid=${bid}`;
+
+    if(status !=undefined){
+        sql=sql+` and status=${status}`
+    }
+    if(dphone !=undefined){
+        sql =sql+` and dphone=${dphone}`
+    }
+
+    con.query(sql, function (err, result) {
+    if (err) {
+        console.log("connection failed"+err.stack)
+        let temp={'action':'some-error'}
+        res.end(JSON.stringify(temp))
+            }
+        else{
+            var count=result[0]['cnt']
+            let temp={'action':count}
+            res.end(JSON.stringify(temp))  
+            
+            }
+              
+        
+    });   
+
+    
+})
 
 
 app.listen(3000)
