@@ -275,7 +275,7 @@ app.get("/Hlogin",function(req,res){
             let temp=result[0]
             temp['action']="valid-user"
             delete temp['dpass']
-            delete temp["hid"]
+            
             delete temp["dtid"]
             
             res.end(JSON.stringify(temp))
@@ -467,7 +467,7 @@ if (err) {
 
 
 
-//receptionsit acknowledges
+//receptionist acknowledge
 app.get("/ackRecp",function(req,res){
     const query=req.query
     var bid=query.bid
@@ -475,9 +475,6 @@ app.get("/ackRecp",function(req,res){
     var time=query.time
 
     
-
-
-
     const sql=`update appointments set status=1, timee=timestamp('${date}','${time}') where bid=${bid}`;
     con.query(sql, function (err, result) {
     if (err) {
