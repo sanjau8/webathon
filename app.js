@@ -362,19 +362,11 @@ app.get("/bAppoint",function(req,res){
     var reason=query['reason']
     var date=query['date']
     var time=query['time']
-    var status=0
+    
 
-    var dateString = date+" "+time,
-    dateTimeParts = dateString.split(' '),
-    timeParts = dateTimeParts[1].split(':'),
-    dateParts = dateTimeParts[0].split('-'),
-    datee;
 
-datee = new Date(dateParts[2], parseInt(dateParts[1], 10) - 1, dateParts[0], timeParts[0], timeParts[1]);
 
-time=datee.getTime()
-
-const sql=`insert into appointments (ppno, dphone, reason, timee, statuss) values ('${ppno}','${dpno}','${reason}','${time}',0)`;
+const sql=`insert into appointments (ppno, dphone, reason, timee, statuss) values ('${ppno}','${dpno}','${reason}',timestamp('${date}','${time}'),0)`;
     con.query(sql, function (err, result) {
     if (err) {
         console.log("connection failed"+err.stack)
@@ -448,10 +440,11 @@ if (err) {
                 var dname=row['dname']
                 var pname=row['namee']
                 var reason=row['reason']
-                var time= parseInt(row['timee'])
+                var time= row['timee']
+                
                 
 
-                var tp={'bid':bid,'dname':dname,'pname':pname,'reason':reason}
+                var tp={'bid':bid,'dname':dname,'pname':pname,'reason':reason,"time":time}
                  
                 items.push(tp)
             })
@@ -481,17 +474,11 @@ app.get("/ackRecp",function(req,res){
     var date=query.date
     var time=query.time
 
-    var dateString = date+" "+time,
-    dateTimeParts = dateString.split(' '),
-    timeParts = dateTimeParts[1].split(':'),
-    dateParts = dateTimeParts[0].split('-'),
-    datee;
+    
 
-datee = new Date(dateParts[2], parseInt(dateParts[1], 10) - 1, dateParts[0], timeParts[0], timeParts[1]);
 
-time=datee.getTime()
 
-    const sql=`update appointments set status=1, timee='${time}' where bid=${bid}`;
+    const sql=`update appointments set status=1, timee=timestamp('${date}','${time}') where bid=${bid}`;
     con.query(sql, function (err, result) {
     if (err) {
         console.log("connection failed"+err.stack)
@@ -520,13 +507,16 @@ app.get("/getCrowd",function(req,res){
     var dphone=query.dphone
     
 
-    var sql=`select count(bid) as cnt from appointments where bid=${bid}`;
+    var sql=`select count(bid) as cnt from appointments`;
 
     if(status !=undefined){
         sql=sql+` and status=${status}`
     }
     if(dphone !=undefined){
         sql =sql+` and dphone=${dphone}`
+    }
+    else{
+        sql=sql+` and dphone in (select dphone from doctors where hid=${hid})`
     }
 
     con.query(sql, function (err, result) {
