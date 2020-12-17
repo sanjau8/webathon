@@ -200,6 +200,37 @@ app.get("/typeInsert",function(req,res){
 })
 
 
+//Insert tablet by admin to masterTablets
+app.get("/tabletInsert",function(req,res){
+
+    const query=req.query
+
+    var tname=query.tname
+    var tdose=query.tdose
+
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE'); // If needed
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type'); // If needed
+  res.setHeader('Access-Control-Allow-Credentials', true);
+    const sql=`insert into masterTablets(tname,tdose) values ('${tname}','${tdose}')`;
+    con.query(sql, function (err, result) {
+    if (err) {
+        console.log("connection failed"+err.stack)
+        let temp={'action':'data-wrong-format'}
+        res.end(JSON.stringify(temp))
+            }
+        else{
+            console.log("1 record inserted");
+            let temp={'action':'record-inserted-successfully'}
+            res.end(JSON.stringify(temp))
+            }
+              
+        
+    });   
+
+})
+
+
 
 
 
@@ -293,6 +324,7 @@ app.get("/Hlogin",function(req,res){
 
 })
 
+// view staffs
 
 app.get("/viewStaff",function(req,res){
 
@@ -471,15 +503,17 @@ if (err) {
 
 
 
-//receptionist acknowledge
-app.get("/ackRecp",function(req,res){
+//acknowledge visit by place
+
+app.get("/ackpat",function(req,res){
     const query=req.query
     var bid=query.bid
     var date=query.date
     var time=query.time
+    var status=query.status
 
     
-    const sql=`update appointments set status=1, timee=timestamp('${date}','${time}') where bid=${bid}`;
+    const sql=`update appointments set status=${status}, timee=timestamp('${date}','${time}') where bid=${bid}`;
     con.query(sql, function (err, result) {
     if (err) {
         console.log("connection failed"+err.stack)
@@ -491,9 +525,13 @@ app.get("/ackRecp",function(req,res){
             let temp={'action':'record-changed-successfully'}
             res.end(JSON.stringify(temp))
             }
-              
-        
+                      
     }); 
+
+    
+
+
+
 })
 
 
@@ -508,11 +546,9 @@ app.get("/getCrowd",function(req,res){
     var dphone=query.dphone
     
 
-    var sql=`select count(bid) as cnt from appointments`;
+    var sql=`select count(bid) as cnt from appointments where statuss=${status}`;
 
-    if(status !=undefined){
-        sql=sql+` and status=${status}`
-    }
+    
     if(dphone !=undefined){
         sql =sql+` and dphone=${dphone}`
     }
@@ -538,6 +574,54 @@ app.get("/getCrowd",function(req,res){
 
     
 })
+
+
+
+// tablet autofill
+app.get("/tabletAutoFill",function(req,res){
+
+    const query=req.query
+
+    var text=query.text
+    text=text.toLowerCase();
+    
+
+    const sql=`select * from masterTablets where lower(tname) like '%${text}%' `;
+    con.query(sql, function (err, result) {
+        var items=[];
+    if (err) {
+        console.log("connection failed"+err.stack)
+        res.end(JSON.stringify(items))
+        
+            }
+        else{
+            if(result.length==0){
+                res.end(JSON.stringify(items))
+            }
+            else{
+            result.forEach(function(row){
+                // var id=row['itemId']
+                // var type=row['typee']
+                // var itemName=row['itemName']
+                // var price=row['price']
+                // var tp={'id':id,'type':type,'itemName':itemName,'price':price}
+                items.push(row)
+            })
+            res.end(JSON.stringify(items))
+            }
+
+            }
+              
+        
+    });   
+
+
+
+})
+
+
+
+
 
 
 app.listen(3000)
