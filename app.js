@@ -409,7 +409,7 @@ else{
 }
 
 if(ppno !=undefined){
-    sql=sql+` where ppno='${ppno}'`
+    sql=sql+` and where ppno='${ppno}'`
 }
 
 sql=sql+` and statuss=${status} order by timee`
