@@ -546,7 +546,9 @@ app.get("/getCrowd",function(req,res){
     var dphone=query.dphone
     
 
-    var sql=`select count(bid) as cnt from appointments where statuss=${status}`;
+    // var sql=`select count(bid) as cnt from appointments where statuss=${status}`;
+
+    var sql=`select count(bid) as cnt from appointments where statuss=1 or statuss=2`;
 
     
     if(dphone !=undefined){
