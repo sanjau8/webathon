@@ -340,7 +340,7 @@ app.get("/viewStaff",function(req,res){
     var sql="";
 
     if(dtid==undefined){
-        sql=`select * from doctors natural join dType where hid=${hid}`   
+        sql=`select * from doctors natural join dType where hid=${hid} and dtid>2`   
     }
     else{
         sql=`select * from doctors natural join dType where hid=${hid} and dtid=${dtid}`  
