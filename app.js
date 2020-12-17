@@ -88,7 +88,6 @@ app.get("/Psignup",function(req,res){
 })
 
 // Patient Login
-
 app.get("/Plogin",function(req,res){
 
     
@@ -199,5 +198,197 @@ app.get("/typeInsert",function(req,res){
     });   
 
 })
+
+
+
+
+
+// Patient Signup
+
+app.get("/Hsignup",function(req,res){
+
+    
+    const query=req.query
+    var name=query['name']    
+    var phoneNo=query['pno']    
+    var pass=query['pass']
+    var hid=query['hid']
+    var dtid=query['dtid']
+
+    
+    
+    const sql=`insert into doctors values ('${name}','${phoneNo}','${pass}','${hid}','${dtid}')`;
+    con.query(sql, function (err, result) {
+    if (err) {
+        console.log("connection failed"+err.stack)
+        let temp={'action':'data-wrong-format'}
+        res.end(JSON.stringify(temp))
+            }
+        else{
+            console.log("1 record inserted");
+            let temp={'action':'record-inserted-successfully'}
+            res.end(JSON.stringify(temp))
+            }
+              
+        
+    });   
+    
+
+})
+
+// Patient Login
+app.get("/Hlogin",function(req,res){
+
+    
+    const query=req.query
+    
+    var pNo=query['pno']
+
+    var pass=query['pass']
+    var type=query['type']
+
+    var sql="";
+
+
+    if(type!=""){
+        sql=`select * from doctors natural join dType natural join hospitals where dphone='${pNo}' and dtid = ${type}`;
+    }
+    else{
+        sql=`select * from doctors natural join dType natural join hospitals where dphone='${pNo}' and dtid >2`;
+    }
+    
+    
+    con.query(sql, function (err, result) {
+    if (err) {
+        console.log("connection failed"+err.stack)
+        let temp={'action':'error-loging-in'}
+        res.end(JSON.stringify(temp))
+            }
+        else{
+            if(result.length==0){
+                let temp={'action':'wrong-user'}
+                res.end(JSON.stringify(temp))   
+            }
+            else{
+            var actPass=result[0]['dpass']
+            if(pass==actPass){
+            let temp=result[0]
+            temp['action']="valid-user"
+            delete temp['dpass']
+            delete temp["hid"]
+            delete temp["dtid"]
+            
+            res.end(JSON.stringify(temp))
+            }
+            else{
+                let temp={'action':'wrong-password'}
+                res.end(JSON.stringify(temp))   
+            }
+        }
+            }
+              
+        
+    });   
+    
+
+})
+
+
+app.get("/viewStaff",function(req,res){
+
+    const query=req.query
+    var hid=query.hid
+    var dtid=query.dtid
+    
+
+    
+
+    var sql="";
+
+    if(dtid==""){
+        sql=`select * from doctors natural join dType where hid=${hid}`   
+    }
+    else{
+        sql=`select * from doctors natural join dType where hid=${hid} and dtid=${dtid}`  
+    }
+
+
+    con.query(sql, function (err, result) {
+        var items=[]
+    if (err) {
+        console.log("connection failed"+err.stack)
+        
+        res.end(JSON.stringify(items))
+            }
+        else{
+            if(result.length==0){
+                
+                res.end(JSON.stringify(items))
+            }
+            
+            else{
+                
+                result.forEach(function(row){
+                    var dname=row['dname']
+                    var dphone=row['dphone']
+                    var dtname=row['dtname']
+                    var dtdesc=row['dtdesc']
+
+                    var tp={'dname':dname,'dphone':dphone,'dtname':dtname,'dtdesc':dtdesc}
+                     
+                    items.push(tp)
+                })
+             
+                res.end(JSON.stringify(items))
+                }
+            }
+              
+        
+    }); 
+
+
+})
+
+
+app.get("/bAppoint",function(req,res){
+    const query=req.query
+
+    var ppno=query['ppno']
+    var dpno=query['dphone']
+    var reason=query['reason']
+    var date=query['date']
+    var time=query['time']
+    var status=0
+
+    var dateString = date+" "+time,
+    dateTimeParts = dateString.split(' '),
+    timeParts = dateTimeParts[1].split(':'),
+    dateParts = dateTimeParts[0].split('-'),
+    datee;
+
+datee = new Date(dateParts[2], parseInt(dateParts[1], 10) - 1, dateParts[0], timeParts[0], timeParts[1]);
+
+time=datee.getTime()
+
+const sql=`insert into appointments (ppno, dphone, reason, timee, statuss) values ('${ppno}','${dpno}','${reason}','${time}',0)`;
+    con.query(sql, function (err, result) {
+    if (err) {
+        console.log("connection failed"+err.stack)
+        let temp={'action':'data-wrong-format'}
+        res.end(JSON.stringify(temp))
+            }
+        else{
+            console.log("1 record inserted");
+            let temp={'action':'record-inserted-successfully'}
+            res.end(JSON.stringify(temp))
+            }
+              
+        
+    });   
+
+
+})
+
+
 
 app.listen(3000)
