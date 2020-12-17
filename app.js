@@ -513,7 +513,7 @@ app.get("/ackpat",function(req,res){
     var status=query.status
 
     
-    const sql=`update appointments set status=${status}, timee=timestamp('${date}','${time}') where bid=${bid}`;
+    const sql=`update appointments set statuss=${status}, timee=timestamp('${date}','${time}') where bid=${bid}`;
     con.query(sql, function (err, result) {
     if (err) {
         console.log("connection failed"+err.stack)
