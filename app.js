@@ -668,7 +668,7 @@ app.get("/chatbot",function(req,res){
       const result = responses[0].queryResult;
       console.log(`  Query: ${result.queryText}`);
       console.log(`  Response: ${result.fulfillmentText}`);
-      res.end(result.fulfillmentText)
+      res.end({"action":result.fulfillmentText})
       if (result.intent) {
         console.log(`  Intent: ${result.intent.displayName}`);
       } else {
