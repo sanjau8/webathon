@@ -730,7 +730,7 @@ app.get("/getTablet",function(req,res){
     const query=req.query
 
     var bid=query.bid
-    text=text.toLowerCase();
+    
     
 
     const sql=`select * from prescription NATURAL JOIN masterTablets where bid=${bid}`;
