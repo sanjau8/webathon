@@ -4,6 +4,7 @@ const app = express()
 const dialogflow = require('@google-cloud/dialogflow');
 const uuid = require('uuid');
 
+// ec2-35-153-225-185.compute-1.amazonaws.com
 
 // set GOOGLE_APPLICATION_CREDENTIALS="newagent-upis-a51838fd1f62.json"
 
@@ -415,7 +416,7 @@ app.get("/bAppoint",function(req,res){
 
 
 
-const sql=`insert into appointments (ppno, dphone, reason, timee, statuss) values ('${ppno}','${dpno}','${reason}',timestamp('${date}','${time}'),0)`;
+const sql=`insert into appointments (pno, dphone, reason, timee, statuss) values ('${ppno}','${dpno}','${reason}',timestamp('${date}','${time}'),0)`;
     con.query(sql, function (err, result) {
     if (err) {
         console.log("connection failed"+err.stack)
@@ -458,7 +459,7 @@ else{
 }
 
 if(ppno !=undefined){
-    sql=sql+` and where ppno='${ppno}'`
+    sql=sql+` and where pno='${ppno}'`
 }
 
 sql=sql+` and statuss=${status} order by timee`
