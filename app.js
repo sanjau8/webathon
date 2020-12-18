@@ -8,6 +8,9 @@ const uuid = require('uuid');
 
 // set GOOGLE_APPLICATION_CREDENTIALS="newagent-upis-a51838fd1f62.json"
 
+
+// export GOOGLE_APPLICATION_CREDENTIALS="/home/ubuntu/newagent-upis-a51838fd1f62.json"
+
 /**
  * Send a query to the dialogflow agent, and return the query result.
  *  {string} projectId The project to be used
