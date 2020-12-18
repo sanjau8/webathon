@@ -1,13 +1,30 @@
 const mysql=require("mysql")
 const express = require('express');
 const app = express()
+const dialogflow = require('@google-cloud/dialogflow');
+const uuid = require('uuid');
 
+
+// set GOOGLE_APPLICATION_CREDENTIALS="newagent-upis-a51838fd1f62.json"
+
+/**
+ * Send a query to the dialogflow agent, and return the query result.
+ *  {string} projectId The project to be used
+ */
+const projectId = 'newagent-upis'
+  // A unique identifier for the given session
+  const sessionId = uuid.v4();
+
+  // Create a new session
+  const sessionClient = new dialogflow.SessionsClient();
+  const sessionPath = sessionClient.projectAgentSessionPath(projectId, sessionId);
 
 // Prevent Server from Crashing
 process.on('uncaughtException', function (err) {
     console.error(err);
     console.log("Node NOT Exiting...");
   });
+
 
 
   // SQL Connection
@@ -607,7 +624,7 @@ app.get("/tabletAutoFill",function(req,res){
                 // var itemName=row['itemName']
                 // var price=row['price']
                 // var tp={'id':id,'type':type,'itemName':itemName,'price':price}
-                items.push(row)
+                items.push({'tid':row["tid"],'tname':row["tname"]+"("+row["tdose"]+")"})
             })
             res.end(JSON.stringify(items))
             }
@@ -623,7 +640,122 @@ app.get("/tabletAutoFill",function(req,res){
 
 
 
+app.get("/chatbot",function(req,res){
 
+    const query=req.query
+    var message=query.msg
+
+    const request = {
+        session: sessionPath,
+        queryInput: {
+          text: {
+            // The query to send to the dialogflow agent
+            text: message,
+            // The language used by the client (en-US)
+            languageCode: 'en-US',
+          },
+        },
+      };
+    
+      // Send request and log result
+      sessionClient.detectIntent(request).then(function(responses){
+
+        console.log('Detected intent');
+      const result = responses[0].queryResult;
+      console.log(`  Query: ${result.queryText}`);
+      console.log(`  Response: ${result.fulfillmentText}`);
+      res.end(result.fulfillmentText)
+      if (result.intent) {
+        console.log(`  Intent: ${result.intent.displayName}`);
+      } else {
+        console.log(`  No intent matched.`);
+      }
+
+      })
+      
+
+
+
+})
+
+
+
+// add tablet to prescription
+
+app.get("/addTablet",function(req,res){
+
+    const query=req.query
+    var bid=query.bid
+    var tid=query.tid
+    var mrng=query.mrng
+    var aftr=query.aftr
+    var nit=query.nit
+    var cnt=query.cnt
+
+    var man=mrng+"-"+aftr+"-"+nit
+
+
+    const sql=`insert into prescription  values (${bid},${tid},'${man}',${cnt})`;
+    con.query(sql, function (err, result) {
+    if (err) {
+        console.log("connection failed"+err.stack)
+        let temp={'action':'data-wrong-format'}
+        res.end(JSON.stringify(temp))
+            }
+        else{
+            console.log("1 record inserted");
+            let temp={'action':'record-inserted-successfully'}
+            res.end(JSON.stringify(temp))
+            }
+              
+        
+    });   
+
+
+
+
+
+})
+
+
+
+// get prescription
+
+app.get("/getTablet",function(req,res){
+
+    const query=req.query
+
+    var bid=query.bid
+    text=text.toLowerCase();
+    
+
+    const sql=`select * from prescription NATURAL JOIN masterTablets where bid=${bid}`;
+    con.query(sql, function (err, result) {
+        var items=[];
+    if (err) {
+        console.log("connection failed"+err.stack)
+        res.end(JSON.stringify(items))
+        
+            }
+        else{
+            if(result.length==0){
+                res.end(JSON.stringify(items))
+            }
+            else{
+            result.forEach(function(row){
+                // var id=row['itemId']
+                // var type=row['typee']
+                // var itemName=row['itemName']
+                // var price=row['price']
+                // var tp={'id':id,'type':type,'itemName':itemName,'price':price}
+                items.push({'tname':row["tname"]+"("+row["tdose"]+")",'man':row["man"],'cnt':row["cnt"]})
+            })
+            res.end(JSON.stringify(items))
+            }
+
+            }
+})
+})
 
 
 app.listen(3000)
