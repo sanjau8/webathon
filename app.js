@@ -452,17 +452,27 @@ var ppno=query.ppno
 
 var sql= `select * from appointments NATURAL JOIN patients NATURAL JOIN doctors`;
 
+var chk=0
+
 if(dphone!=undefined){
     sql=sql+` where dphone='${dphone}'`
+    chk=1
 }
-else{
+else if(hid!=undefined){
 
     sql=sql+` where dphone in (select dphone from doctors where hid=${hid})`
+    chk=1
 
 }
 
 if(ppno !=undefined){
-    sql=sql+` and where pno='${ppno}'`
+    if(chk==1){
+        sql=sql+" and"
+    }
+    else{
+        sql=sql+" where"
+    }
+    sql=sql+` pno='${ppno}'`
 }
 
 sql=sql+` and statuss=${status} order by timee`
@@ -471,7 +481,7 @@ if(status==2){
     sql=sql+` desc`
 }
 
-
+console.log(sql)
 
 con.query(sql, function (err, result) {
     var items=[]
