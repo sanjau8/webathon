@@ -477,7 +477,7 @@ if(ppno !=undefined){
 
 sql=sql+` and statuss=${status} order by timee`
 
-if(status==2){
+if(status==3){
     sql=sql+` desc`
 }
 
