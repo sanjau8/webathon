@@ -481,7 +481,7 @@ if(status==3){
     sql=sql+` desc`
 }
 
-console.log(sql)
+
 
 con.query(sql, function (err, result) {
     var items=[]
