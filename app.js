@@ -668,11 +668,62 @@ app.get("/chatbot",function(req,res){
       const result = responses[0].queryResult;
       console.log(`  Query: ${result.queryText}`);
       console.log(`  Response: ${result.fulfillmentText}`);
-      res.end(JSON.stringify({"action":result.fulfillmentText}))
+      
       if (result.intent) {
         console.log(`  Intent: ${result.intent.displayName}`);
+
+        var intnt=result.intent.displayName
+
+        var sql=""
+
+        if(intnt=="hospitals in chennai"){
+
+            sql=`select hname from hospitals where hcity='${result.fulfillmentText}' `
+
+
+            con.query(sql, function (err, resultt) {
+                
+            if (err) {
+                console.log("connection failed"+err.stack)
+                
+                res.end(JSON.stringify({"action":`MedApp has faced an internal server error. Please try again later`}))
+                    }
+                else{
+                    if(resultt.length==0){
+                        
+                        res.end(JSON.stringify({"action":`MedApp is working to scale its business in ${result.fulfillmentText}`}))                    }
+                    
+                    else{
+                        
+                        var txt=`The hospitals in ${result.fulfillmentText} are:\n`
+                        i=1
+                        resultt.forEach(function(row){
+                            txt=txt+`${i}. ${row["hname"]}\n`
+                            i+=1
+                        })
+                     
+                        res.end(JSON.stringify({"action":txt}))
+                        }
+                    }
+                      
+                
+            }); 
+
+
+
+
+        }
+
+        else{
+            res.end(JSON.stringify({"action":result.fulfillmentText}))
+        }
+
+
+
+
       } else {
         console.log(`  No intent matched.`);
+        res.end(JSON.stringify({"action":result.fulfillmentText}))
       }
 
       })
