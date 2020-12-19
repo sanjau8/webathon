@@ -503,6 +503,7 @@ if (err) {
                 var dname=row['dname']
                 var pname=row['namee']
                 var reason=row['reason']
+                var pno=row["pno"]
                 var time= new Date(row['timee'])
 
                 time=time.getDate()+"-"+(time.getMonth()+1)+"-"+time.getFullYear()+" "+time.getHours()+":"+time.getMinutes()
@@ -511,7 +512,7 @@ if (err) {
                 
                 
 
-                var tp={'bid':bid,'dname':dname,'pname':pname,'reason':reason,"time":time}
+                var tp={'bid':bid,'dname':dname,'pname':pname,'reason':reason,"time":time,"pno":pno}
                  
                 items.push(tp)
             })
